@@ -12,39 +12,70 @@
     display: flex; flex-direction: column; align-items: center;
     min-height: 100vh;
   }
-  h1 { margin-top: 20px; color: #fff; text-shadow: 2px 2px 5px #0d47a1; }
-  .tabs { margin-top: 15px; }
-  .tab-btn {
-    padding: 10px 20px; margin: 3px;
-    font-size: 16px; border: none;
-    border-radius: 10px; cursor: pointer;
-    background: #1976d2; color: white; font-weight: bold;
+  h1 {
+    margin-top: 20px; color: #fff; text-shadow: 2px 2px 5px #0d47a1;
   }
-  .tab-btn.active { background: #0d47a1; box-shadow: 0 0 10px rgba(0,0,0,0.3); }
+
   .game-card {
     background: rgba(255,255,255,0.95);
-    padding: 30px; border-radius: 20px;
+    padding: 20px; border-radius: 20px;
     box-shadow: 0 10px 25px rgba(0,0,0,0.3);
-    text-align: center; margin-top: 20px;
+    display: flex; gap: 20px;
     position: relative; overflow: hidden;
+    max-width: 1000px;
   }
-  canvas { margin: 20px 0; border-radius: 15px; border: 2px solid #0d47a1; background: #fff; }
-  input[type="text"] {
-    padding: 12px; font-size: 18px; width: 240px;
-    border-radius: 10px; border: 2px solid #0d47a1;
-    outline: none; text-align: center;
+
+  .game-content {
+    flex: 1;
+    display: flex; flex-direction: column; align-items: center;
   }
-  button {
-    padding: 12px 20px; margin: 6px; font-size: 18px;
-    border: none; border-radius: 12px; cursor: pointer;
-    background: #0d47a1; color: white; font-weight: bold;
+
+  canvas {
+    margin: 20px 0; border-radius: 15px; border: 2px solid #0d47a1; background: #fff;
+  }
+
+  .right-panel {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+    min-width: 180px;
+    justify-items: center;
+  }
+
+  .tab-btn {
+    padding: 10px 15px; font-size: 16px;
+    border: none; border-radius: 10px; cursor: pointer;
+    background: #1976d2; color: white; font-weight: bold;
+    width: 100%;
+    text-align: center;
     transition: 0.3s;
   }
-  button:hover { background: #1976d2; }
-  .feedback { font-size: 22px; font-weight: bold; margin-top: 15px; min-height: 30px; }
+  .tab-btn.active { background: #0d47a1; box-shadow: 0 0 10px rgba(0,0,0,0.3); }
+
+  input[type="text"] {
+    padding: 12px; font-size: 18px; width: 160px;
+    border-radius: 10px; border: 2px solid #0d47a1;
+    outline: none; text-align: center; grid-column: span 2;
+  }
+
+  .keypad {
+    display: flex; flex-wrap: wrap; justify-content: center; gap: 6px;
+    grid-column: span 2;
+  }
+  .keypad button { width: 60px; padding: 8px; font-size: 16px; }
+
+  button.submit-btn {
+    padding: 10px 16px; font-size: 16px; grid-column: span 2;
+    border-radius: 10px;
+    background: #0d47a1; color: #fff; font-weight: bold;
+    cursor: pointer;
+    transition: 0.3s;
+  }
+  button.submit-btn:hover { background: #1976d2; }
+
+  .feedback { font-size: 20px; font-weight: bold; min-height: 30px; text-align: center; }
   .progress { font-size: 18px; color: #444; margin-top: 10px; }
-  .keypad { margin-top: 15px; }
-  .keypad button { width: 60px; }
+
   .firework {
     position: absolute; width: 8px; height: 8px; border-radius: 50%;
     pointer-events: none; animation: explode 1.2s forwards;
@@ -54,47 +85,53 @@
     70% {transform: scale(2.5); opacity: 0.9;}
     100% {transform: scale(4); opacity: 0;}
   }
+
+  @media(max-width: 800px){
+    .game-card { flex-direction: column; align-items: center; }
+    .right-panel { grid-template-columns: repeat(2, 1fr); }
+  }
 </style>
 </head>
 <body>
 
 <h1>⚪ Circle Area Game</h1>
 
-<div class="tabs">
-  <button class="tab-btn active" onclick="switchMode('radius', event)">Radius Given</button>
-  <button class="tab-btn" onclick="switchMode('diameter', event)">Diameter Given</button>
-  <button class="tab-btn" onclick="restartGame()">Restart 🔄</button>
-</div>
-
 <div class="game-card">
-  <div class="progress" id="progress"></div>
-  <canvas id="shapeCanvas" width="400" height="300"></canvas>
-  <div>
-    <label for="answer">Enter area: </label>
-    <input type="text" id="answer" placeholder="e.g. 78.5 or π*7^2">
+  <div class="game-content">
+    <div class="progress" id="progress"></div>
+    <canvas id="shapeCanvas" width="400" height="300"></canvas>
+    <div id="feedback" class="feedback"></div>
   </div>
 
-  <div class="keypad">
-    <button onclick="insertSymbol('π')">π</button>
-    <button onclick="insertSymbol('^')">^</button>
-    <button onclick="insertSymbol('(')">(</button>
-    <button onclick="insertSymbol(')')">)</button><br>
-    <button onclick="insertSymbol('+')">+</button>
-    <button onclick="insertSymbol('-')">−</button>
-    <button onclick="insertSymbol('*')">×</button>
-    <button onclick="insertSymbol('/')">÷</button>
-  </div>
+  <div class="right-panel">
+    <!-- Operation Tabs -->
+    <button class="tab-btn active" onclick="switchMode('radius', event)">Radius</button>
+    <button class="tab-btn" onclick="switchMode('diameter', event)">Diameter</button>
+    <button class="tab-btn" onclick="restartGame()">Restart 🔄</button>
 
-  <div>
-    <button onclick="checkAnswer()">Submit ✅</button>
+    <!-- Answer Input -->
+    <input type="text" id="answer" placeholder="Enter area">
+
+    <!-- Keypad -->
+    <div class="keypad">
+      <button onclick="insertSymbol('π')">π</button>
+      <button onclick="insertSymbol('^')">^</button>
+      <button onclick="insertSymbol('(')">(</button>
+      <button onclick="insertSymbol(')')">)</button>
+      <button onclick="insertSymbol('+')">+</button>
+      <button onclick="insertSymbol('-')">−</button>
+      <button onclick="insertSymbol('*')">×</button>
+      <button onclick="insertSymbol('/')">÷</button>
+    </div>
+
+    <!-- Submit Button -->
+    <button class="submit-btn" onclick="checkAnswer()">Submit ✅</button>
   </div>
-  <div id="feedback" class="feedback"></div>
 </div>
 
 <audio id="applause" src="https://www.soundjay.com/human/applause-8.mp3"></audio>
 
 <script>
-// Random number generator
 function rand(min,max){return Math.floor(Math.random()*(max-min+1))+min;}
 
 const circles = {
@@ -162,7 +199,6 @@ function calcArea(circle){
   }
 }
 
-// Preprocess input: allow π, implied multiplication, ^ for power
 function preprocessInput(str){
   return str
     .replace(/π/g,"Math.PI")
@@ -170,6 +206,19 @@ function preprocessInput(str){
     .replace(/(Math\.PI)(\d)/g,"$1*$2")
     .replace(/\^/g,"**");
 }
+
+const positiveResponses = [
+  "🎉 Correct! Amazing job!",
+  "👏 Bravo! You nailed it!",
+  "🌟 Perfect! You're a star!",
+  "🔥 Awesome work! Keep it up!"
+];
+const negativeResponses = [
+  "❌ Oops! Try again!",
+  "😅 Not quite, give it another shot!",
+  "🚫 Wrong, but you can do it!",
+  "🤔 Close! Try once more!"
+];
 
 function checkAnswer(){
   const circle=filtered[currentIndex];
@@ -193,7 +242,7 @@ function checkAnswer(){
     userValue === rounded3;
 
   if(isCorrect){
-    feedback.textContent='🎉 Correct!';
+    feedback.textContent=positiveResponses[Math.floor(Math.random()*positiveResponses.length)];
     feedback.style.color='green';
     showFireworks();
     document.getElementById("applause").play();
@@ -206,7 +255,7 @@ function checkAnswer(){
       } else loadShape();
     },1500);
   } else {
-    feedback.textContent='❌ Try again!';
+    feedback.textContent=negativeResponses[Math.floor(Math.random()*negativeResponses.length)];
     feedback.style.color='red';
   }
 }
@@ -225,20 +274,19 @@ function showFireworks(){
   }
 }
 
-// Insert symbol into input
 function insertSymbol(sym){
   const input=document.getElementById("answer");
   input.value+=sym;
   input.focus();
 }
 
-// Enable Enter key
 document.getElementById("answer").addEventListener("keypress", function(e){
   if(e.key === "Enter"){ checkAnswer(); }
 });
 
-// init
 switchMode('radius',{target:document.querySelector('.tab-btn')});
 </script>
 </body>
 </html>
+
+
